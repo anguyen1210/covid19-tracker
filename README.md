@@ -16,5 +16,5 @@ Additional features and edits will be added on an ongoing basis.
   
 All comments, suggestions and pull requests welcome.  
 
-
+![]("p_log10.png")
 
