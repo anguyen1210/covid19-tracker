@@ -1,10 +1,11 @@
-# ------------------------------------------------------------------------------
-#
-# Title:  Helper functions for covid19 shiny app
-# Author: Anthony Nguyen
-# Contact: @anguyen1210; mentalbreaks.rbind.io
-#
-# ------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+#     
+# TITLE: COVID-19 Tracker: Days since N -- Custonm functions for shiny app
+# AUTHOR: Anthony Nguyen; @anguyen1210
+# URL: mentalbreaks.shinyapps.io/covid19/
+# MORE INFO: mentalbreaks.rbind.io/posts/covid-19-tracker/
+# 
+# -------------------------------------------------------------------------------  
 
 #the functions defined below require the following libraries, which are loaded in the main application script
 # if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")

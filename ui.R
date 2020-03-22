@@ -33,16 +33,16 @@ shinyUI(fluidPage(
                      fluidRow(column(3, verbatimTextOutput("value"))),
                      strong("Source:"),  
                      p("The data source for this app is made public by the Johns Hopkins
-                       Center for Systems Science and Engineering (JHU CSSE). For more
-                       more information on how this data was collected, along with links to
-                       the Github repo, please visit the ",
+                       Center for Systems Science and Engineering (JHU CSSE) and is ", 
+                       a("available on Github. ", href="https://github.com/CSSEGISandData/COVID-19"),
+                       "Additional information about the data and its collection is available on the ",
                        a("JHU CSSE 'Mapping 2019-nCov' blog post.",
                          href = "https://systems.jhu.edu/research/public-health/ncov/")),
                      br(),
                      strong("Contact:"),
                      p("Please visit ",
                        a("my blog", href = "https://mentalbreaks.rbind.io/posts/covid-19-tracker/"), 
-                       ("for more information and to leave comments or suggestions.")),
+                       ("for more background on the app and to leave comments or suggestions.")),
                      br(),
                      strong("Data accessed: "),
                      textOutput("stamp")
