@@ -4,7 +4,7 @@ This repo contains the code for the shiny app found at:
   
 > [https://mentalbreaks.shinyapps.io/covid19/](https://mentalbreaks.shinyapps.io/covid19/)
   
-The data source for this app is provided by the Johns Hopkins Center for Systems Science and Engineering (JHU CSSE) and is [available on Github](https://github.com/CSSEGISandData/COVID-19).
+The data source for this app is provided by the Johns Hopkins Center for Systems Science and Engineering (JHU CSSE) and is available on the [CSSEGISandData/COVID-19 repo](https://github.com/CSSEGISandData/COVID-19).
     
 Additional information about the data and its collection is available on the [JHU CSSE 'Mapping 2019-nCov' blog post](https://systems.jhu.edu/research/public-health/ncov/).    
   
