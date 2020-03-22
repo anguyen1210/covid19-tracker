@@ -15,6 +15,7 @@ For additional background, and to leave comments or suggestions, please visit [m
 Additional features and edits will be added on an ongoing basis.  
   
 All comments, suggestions and pull requests welcome.  
-
-![](p_log10.png)
+  
+    
+![](p_log10.png)  
 

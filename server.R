@@ -37,35 +37,25 @@ dat3 <- prep_dat(dat3)
 
 # -------------------------------------------------------------------------------
 
-# Define server logic, subset based on country selection
+
 shinyServer(function(input, output) {
+    
+    # Subset based on country selection
+    
+    current_selection <- reactiveVal(list("Switzerland", "Spain", "Italy", "France, France", "Germany"))
+    
+    observeEvent(input$country_from_dat, {
+        current_selection(input$country_from_dat)
+    })
 
     output$choose_country <- renderUI({
-        if (input$radio_button==1){
-            selectizeInput("country_from_dat", 
-                           "Country", 
-                           choices = as.character(dat1$country), 
-                           multiple=TRUE,
-                           selected = list("Switzerland", "Spain", "Italy", "France, France", "Germany"),
-                           options = list(maxItems = 6)
-            ) 
-        } else if (input$radio_button==2){
-            selectizeInput("country_from_dat", 
-                           "Country", 
-                           choices = as.character(dat2$country), 
-                           multiple=TRUE,
-                           selected = list("Switzerland", "Spain", "Italy", "France, France", "Germany"),
-                           options = list(maxItems = 6)
-            ) 
-        } else {
-            selectizeInput("country_from_dat", 
-                           "Country", 
-                           choices = as.character(dat3$country), 
-                           multiple=TRUE,
-                           selected = list("Switzerland", "Spain", "Italy", "France, France", "Germany"),
-                           options = list(maxItems = 6)
-            ) 
-        }
+        selectizeInput("country_from_dat", 
+                       "Country", 
+                       choices = as.character(dat1$country), 
+                       multiple=TRUE,
+                       selected = current_selection(),
+                       options = list(maxItems = 6)
+        )
     })
     
     dat_sub <- reactive({
