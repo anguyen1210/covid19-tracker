@@ -23,7 +23,7 @@ shinyUI(fluidPage(
     sidebarLayout(
         sidebarPanel(
                      radioButtons("radio_outcome", label = "Outcome",
-                                  choices = list("confirmed cases" = 1, "deaths" = 2, "recovered" = 3), 
+                                  choices = list("confirmed cases" = 1, "deaths" = 2),  #, "recovered" = 3
                                   selected = 1, inline=TRUE),
             
                      uiOutput("choose_country"),
@@ -33,7 +33,7 @@ shinyUI(fluidPage(
                      fluidRow(column(3, verbatimTextOutput("value"))),
                      radioButtons("radio_lsetting", label = "Line setting",
                                   choices = list("straight segments" = 1, "fitted" = 2), 
-                                  selected = 2, inline=TRUE),
+                                  selected = 1, inline=TRUE),
                      br(),
                      strong("Source:"),
                      p("The data source for this app is made public by the Johns Hopkins

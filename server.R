@@ -21,19 +21,21 @@ if(!require(directlabels)) install.packages("directlabels", repos = "http://cran
 # load custom functions and plotting theme
 source("dsn_tools.R")
 
-# get updated data
-url_confirmed <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
-url_deaths <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
-url_recovered <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv'
+# deprecated--switching to new structures as of 24-Mar-2020
+# url_confirmed <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
+# url_deaths <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
+#url_recovered <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv'
+
+# get new data structure release
+url_confirmed <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
+url_deaths <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 
 dat1 <- read_csv(url(url_confirmed))
 dat2 <- read_csv(url(url_deaths))
-dat3 <- read_csv(url(url_recovered))
 
 # transform data
 dat1 <- prep_dat(dat1) 
 dat2 <- prep_dat(dat2) 
-dat3 <- prep_dat(dat3) 
 
 # -------------------------------------------------------------------------------
 
@@ -42,7 +44,7 @@ shinyServer(function(input, output) {
     
     # Subset based on country selection
     
-    current_selection <- reactiveVal(list("Switzerland", "Spain", "US, (All territories)", "Italy"))
+    current_selection <- reactiveVal(list("Switzerland", "Spain", "US", "Italy"))
     
     observeEvent(input$country_from_dat, {
         current_selection(input$country_from_dat)
@@ -54,17 +56,15 @@ shinyServer(function(input, output) {
                        choices = sort(as.character(dat1$country)), 
                        multiple=TRUE,
                        selected = current_selection(),
-                       options = list(maxItems = 6) #JS_opts
+                       options = list(maxItems = 6) 
                        )
     })
     
     dat_sub <- reactive({
         if (input$radio_outcome == 1){
             subset(dat1, country %in% input$country_from_dat) %>% std_date_to_n(., input$num)
-        } else if (input$radio_outcome == 2){
+        } else { 
             subset(dat2, country %in% input$country_from_dat) %>% std_date_to_n(., input$num)
-        } else {
-            subset(dat3, country %in% input$country_from_dat) %>% std_date_to_n(., input$num)
         }
     })
     
@@ -83,30 +83,24 @@ shinyServer(function(input, output) {
     ptitle1 <- reactive({ 
         if (input$radio_outcome==1){
             ptitle1 <- "Coronavirus COVID-19: Confirmed cases"
-        } else if (input$radio_outcome==2){
-            ptitle1 <- "Coronavirus COVID-19: Deaths"
         } else {
-            ptitle1 <- "Coronavirus COVID-19: Recovered"
+            ptitle1 <- "Coronavirus COVID-19: Deaths"
         }
     })
     
     ptitle2 <- reactive({ 
         if (input$radio_outcome==1){
             ptitle2 <- "Coronavirus COVID-19: Confirmed cases (log scale)"
-        } else if (input$radio_outcome==2){
+                } else {
             ptitle2 <- "Coronavirus COVID-19: Deaths (log scale)"
-        } else {
-            ptitle2 <- "Coronavirus COVID-19: Recovered (log scale)"
         }
     })
     
     xlabel <- reactive({ 
         if (input$radio_outcome==1){
             xlabel <- paste0("Days since confirmed cases \u2265 ", input$num)
-        } else if (input$radio_outcome==2){
-            xlabel <- paste0("Days since deaths \u2265 ", input$num)
         } else {
-            xlabel <- paste0("Days since recovered cases \u2265 ", input$num)
+            xlabel <- paste0("Days since deaths \u2265 ", input$num)
         }
     })
     
@@ -120,9 +114,9 @@ shinyServer(function(input, output) {
     })
     
     total_vs_country <- reactive({
-        if (input$radio_lsetting==2){
+        if (input$radio_lsetting==1){
             p1 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
+                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
                 geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
                 theme_lineplot() +
                 scale_color_brewer(palette="Dark2") +
@@ -134,7 +128,7 @@ shinyServer(function(input, output) {
                 labs(caption = pcaption())
         } else {
             p1 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
+                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
                 geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
                 theme_lineplot() +
                 scale_color_brewer(palette="Dark2") +
@@ -153,9 +147,9 @@ shinyServer(function(input, output) {
     })
     
     logtotal_vs_country <- reactive({
-        if (input$radio_lsetting==2){
+        if (input$radio_lsetting==1){
             p2 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
+                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
                 geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
                 theme_lineplot() +
                 scale_color_brewer(palette="Dark2") +
@@ -168,7 +162,7 @@ shinyServer(function(input, output) {
                 labs(caption = pcaption())
         } else {
             p2 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
+                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
                 geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
                 theme_lineplot() +
                 scale_color_brewer(palette="Dark2") +
