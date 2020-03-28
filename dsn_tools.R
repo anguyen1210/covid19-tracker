@@ -11,36 +11,57 @@
 # if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")
 # if(!require(tidyr)) install.packages("tidyr", repos = "http://cran.us.r-project.org")
 # if(!require(stringr)) install.packages("stringr", repos = "http://cran.us.r-project.org")
+# if(!require(countrycode)) install.packages("countrycode", repos = "http://cran.us.r-project.org")
 # if(!require(ggplot2)) install.packages("ggplot2", repos = "http://cran.us.r-project.org")
 
-#this function adds pivots data to long format for plotting, and adds derived columns 
-prep_dat <- function(df){
-    
-    df_allterritories <- df %>% filter(!str_detect(`Province/State`, ',')) %>% 
+#this function cleans country cols, adds population, calculates 'count_per_mil' 
+prep_global <- function(df, pop){
+    #aggregate Australia, Canada, China for global table 
+    national_agg <- df %>% 
+        filter(`Country/Region` %in% c("Australia", "Canada", "China")) %>% 
         group_by(`Country/Region`) %>% 
-        bind_rows(summarise_all(., ~ if (is.numeric(.)) sum(.) else "(All territories)")) %>% 
-        filter(`Province/State` == "(All territories)")
+        summarise_if(is.numeric, sum)
     
-    df <- bind_rows(df, df_allterritories)
+    #drop "Diamond Princess", "Recovered" and all countries already subsetted into the `national` table
+    df <- df %>% 
+        filter(is.na(`Province/State`) | `Province/State`!="Diamond Princess") %>% 
+        filter(`Country/Region`!= "Diamond Princess") %>% 
+        filter(is.na(`Province/State`) | `Province/State` !="Recovered") %>% 
+        filter(!(`Country/Region` %in% c("Australia", "Canada", "China")))
     
-    #merge and clean Province/State column to Country column
-    df$country <- paste0(df$`Country/Region`, ", ", df$`Province/State`)
-    df$country <- str_replace_all(df$country, ", NA", "")
+    #add national aggregates to global table
+    df <- bind_rows(df, national_agg)
     
-    #drop unneccessary columns
+    #convert remaining `Province/State` territories `Country` in global table  
+    df <- df %>%  mutate(country = ifelse(is.na(`Province/State`), `Country/Region`, `Province/State`))
+    
+    #drop unneccessary columns from global
     df <- df %>% select(-`Province/State`, -`Country/Region`, -Lat, -Long)
     
-    #pivot long
+    #pivot long, global
     df <- df %>% pivot_longer(-country, names_to = "date", values_to = "count") 
     
-    #gen 'growth_factor'
-    df <- df %>% group_by(country) %>% mutate(diff = count - lag(count))
-    df <- df %>% group_by(country) %>% mutate(growth_factor = diff/lag(diff))
+    #add iso3 codes to global
+    df$iso2c <- countrycode::countrycode(df$country, origin = 'country.name', destination = 'iso2c')
+    df <- df %>% select(iso2c, everything())
+    
+    #fill in missing codes
+    df$iso2c[df$country=="Eswatini"] <- "SZ"
+    df$iso2c[df$country=="St Martin"] <- "MF"
+    df$iso2c[df$country=="Channel Islands"] <- "JG"
+    df$iso2c[df$country=="Kosovo"] <- "XK"
+    
+    #add population figures to global
+    df <- df %>% 
+        left_join(select(pop, population, iso2c), by = c("iso2c" = "iso2c"))
+    
+    #reorder, calculate 'count_per_mil'
+    df <- df %>% select(iso2c, country, population, date, count)
+    df$count_per_mil <- df$count/df$population * 1000000
     
     return(df)
-    
 }
-
+    
 
 #creates a new column in the reshaped (long) df, counting days since confirmed \geq n
 std_date_to_n <- function(df, n){
