@@ -1,0 +1,265 @@
+iso2c,country,population,year
+1A,Arab World,419790588,2018
+S3,Caribbean small states,7358965,2018
+B8,Central Europe and the Baltics,102511922,2018
+V2,Early-demographic dividend,3249140605,2018
+Z4,East Asia & Pacific,2328220870,2018
+4E,East Asia & Pacific (excluding high income),2081651801,2018
+T4,East Asia & Pacific (IDA & IBRD countries),2056064424,2018
+XC,Euro area,341783171,2018
+Z7,Europe & Central Asia,918793590,2018
+7E,Europe & Central Asia (excluding high income),417797257,2018
+T7,Europe & Central Asia (IDA & IBRD countries),459865205,2018
+EU,European Union,513213363,2018
+F1,Fragile and conflict affected situations,515215936,2018
+XE,Heavily indebted poor countries (HIPC),780234406,2018
+XD,High income,1210312147,2018
+XF,IBRD only,4772284113,2018
+ZT,IDA & IBRD total,6412522234,2018
+XH,IDA blend,555830605,2018
+XI,IDA only,1084407516,2018
+XG,IDA total,1640238121,2018
+V3,Late-demographic dividend,2288665963,2018
+ZJ,Latin America & Caribbean,641357515,2018
+XJ,Latin America & Caribbean (excluding high income),609013934,2018
+T2,Latin America & the Caribbean (IDA & IBRD countries),625569713,2018
+XL,Least developed countries: UN classification,1009662578,2018
+XO,Low & middle income,6383958209,2018
+XM,Low income,705417321,2018
+XN,Lower middle income,3022905169,2018
+ZQ,Middle East & North Africa,448912859,2018
+XQ,Middle East & North Africa (excluding high income),382896715,2018
+T3,Middle East & North Africa (IDA & IBRD countries),378327628,2018
+XP,Middle income,5678540888,2018
+XU,North America,364290258,2018
+XY,Not classified,NA,2018
+OE,OECD members,1303529456,2018
+S4,Other small states,30758989,2018
+S2,Pacific island small states,2457367,2018
+V4,Post-demographic dividend,1109997273,2018
+V1,Pre-demographic dividend,919485393,2018
+S1,Small states,40575321,2018
+8S,South Asia,1814388744,2018
+T5,South Asia (IDA & IBRD),1814388744,2018
+ZG,Sub-Saharan Africa,1078306520,2018
+ZF,Sub-Saharan Africa (excluding high income),1078209758,2018
+T6,Sub-Saharan Africa (IDA & IBRD countries),1078306520,2018
+XT,Upper middle income,2655635719,2018
+1W,World,7594270356,2018
+AF,Afghanistan,37172386,2018
+AL,Albania,2866376,2018
+DZ,Algeria,42228429,2018
+AS,American Samoa,55465,2018
+AD,Andorra,77006,2018
+AO,Angola,30809762,2018
+AG,Antigua and Barbuda,96286,2018
+AR,Argentina,44494502,2018
+AM,Armenia,2951776,2018
+AW,Aruba,105845,2018
+AU,Australia,24992369,2018
+AT,Austria,8847037,2018
+AZ,Azerbaijan,9942334,2018
+BS,"Bahamas, The",385640,2018
+BH,Bahrain,1569439,2018
+BD,Bangladesh,161356039,2018
+BB,Barbados,286641,2018
+BY,Belarus,9485386,2018
+BE,Belgium,11422068,2018
+BZ,Belize,383071,2018
+BJ,Benin,11485048,2018
+BM,Bermuda,63968,2018
+BT,Bhutan,754394,2018
+BO,Bolivia,11353142,2018
+BA,Bosnia and Herzegovina,3323929,2018
+BW,Botswana,2254126,2018
+BR,Brazil,209469333,2018
+VG,British Virgin Islands,29802,2018
+BN,Brunei Darussalam,428962,2018
+BG,Bulgaria,7024216,2018
+BF,Burkina Faso,19751535,2018
+BI,Burundi,11175378,2018
+CV,Cabo Verde,543767,2018
+KH,Cambodia,16249798,2018
+CM,Cameroon,25216237,2018
+CA,Canada,37058856,2018
+KY,Cayman Islands,64174,2018
+CF,Central African Republic,4666377,2018
+TD,Chad,15477751,2018
+JG,Channel Islands,170499,2018
+CL,Chile,18729160,2018
+CN,China,1392730000,2018
+CO,Colombia,49648685,2018
+KM,Comoros,832322,2018
+CD,"Congo, Dem. Rep.",84068091,2018
+CG,"Congo, Rep.",5244363,2018
+CR,Costa Rica,4999441,2018
+CI,Cote d'Ivoire,25069229,2018
+HR,Croatia,4089400,2018
+CU,Cuba,11338138,2018
+CW,Curacao,159849,2018
+CY,Cyprus,1189265,2018
+CZ,Czech Republic,10625695,2018
+DK,Denmark,5797446,2018
+DJ,Djibouti,958920,2018
+DM,Dominica,71625,2018
+DO,Dominican Republic,10627165,2018
+EC,Ecuador,17084357,2018
+EG,"Egypt, Arab Rep.",98423595,2018
+SV,El Salvador,6420744,2018
+GQ,Equatorial Guinea,1308974,2018
+ER,Eritrea,NA,2018
+EE,Estonia,1320884,2018
+SZ,Eswatini,1136191,2018
+ET,Ethiopia,109224559,2018
+FO,Faroe Islands,48497,2018
+FJ,Fiji,883483,2018
+FI,Finland,5518050,2018
+FR,France,66987244,2018
+PF,French Polynesia,277679,2018
+GA,Gabon,2119275,2018
+GM,"Gambia, The",2280102,2018
+GE,Georgia,3731000,2018
+DE,Germany,82927922,2018
+GH,Ghana,29767108,2018
+GI,Gibraltar,33718,2018
+GR,Greece,10727668,2018
+GL,Greenland,56025,2018
+GD,Grenada,111454,2018
+GU,Guam,165768,2018
+GT,Guatemala,17247807,2018
+GN,Guinea,12414318,2018
+GW,Guinea-Bissau,1874309,2018
+GY,Guyana,779004,2018
+HT,Haiti,11123176,2018
+HN,Honduras,9587522,2018
+HK,"Hong Kong SAR, China",7451000,2018
+HU,Hungary,9768785,2018
+IS,Iceland,353574,2018
+IN,India,1352617328,2018
+ID,Indonesia,267663435,2018
+IR,"Iran, Islamic Rep.",81800269,2018
+IQ,Iraq,38433600,2018
+IE,Ireland,4853506,2018
+IM,Isle of Man,84077,2018
+IL,Israel,8883800,2018
+IT,Italy,60431283,2018
+JM,Jamaica,2934855,2018
+JP,Japan,126529100,2018
+JO,Jordan,9956011,2018
+KZ,Kazakhstan,18276499,2018
+KE,Kenya,51393010,2018
+KI,Kiribati,115847,2018
+KP,"Korea, Dem. Peopleâ€™s Rep.",25549819,2018
+KR,"Korea, Rep.",51635256,2018
+XK,Kosovo,1845300,2018
+KW,Kuwait,4137309,2018
+KG,Kyrgyz Republic,6315800,2018
+LA,Lao PDR,7061507,2018
+LV,Latvia,1926542,2018
+LB,Lebanon,6848925,2018
+LS,Lesotho,2108132,2018
+LR,Liberia,4818977,2018
+LY,Libya,6678567,2018
+LI,Liechtenstein,37910,2018
+LT,Lithuania,2789533,2018
+LU,Luxembourg,607728,2018
+MO,"Macao SAR, China",631636,2018
+MG,Madagascar,26262368,2018
+MW,Malawi,18143315,2018
+MY,Malaysia,31528585,2018
+MV,Maldives,515696,2018
+ML,Mali,19077690,2018
+MT,Malta,483530,2018
+MH,Marshall Islands,58413,2018
+MR,Mauritania,4403319,2018
+MU,Mauritius,1265303,2018
+MX,Mexico,126190788,2018
+FM,"Micronesia, Fed. Sts.",112640,2018
+MD,Moldova,3545883,2018
+MC,Monaco,38682,2018
+MN,Mongolia,3170208,2018
+ME,Montenegro,622345,2018
+MA,Morocco,36029138,2018
+MZ,Mozambique,29495962,2018
+MM,Myanmar,53708395,2018
+"NA",Namibia,2448255,2018
+NR,Nauru,12704,2018
+NP,Nepal,28087871,2018
+NL,Netherlands,17231017,2018
+NC,New Caledonia,284060,2018
+NZ,New Zealand,4885500,2018
+NI,Nicaragua,6465513,2018
+NE,Niger,22442948,2018
+NG,Nigeria,195874740,2018
+MK,North Macedonia,2082958,2018
+MP,Northern Mariana Islands,56882,2018
+NO,Norway,5314336,2018
+OM,Oman,4829483,2018
+PK,Pakistan,212215030,2018
+PW,Palau,17907,2018
+PA,Panama,4176873,2018
+PG,Papua New Guinea,8606316,2018
+PY,Paraguay,6956071,2018
+PE,Peru,31989256,2018
+PH,Philippines,106651922,2018
+PL,Poland,37978548,2018
+PT,Portugal,10281762,2018
+PR,Puerto Rico,3195153,2018
+QA,Qatar,2781677,2018
+RO,Romania,19473936,2018
+RU,Russian Federation,144478050,2018
+RW,Rwanda,12301939,2018
+WS,Samoa,196130,2018
+SM,San Marino,33785,2018
+ST,Sao Tome and Principe,211028,2018
+SA,Saudi Arabia,33699947,2018
+SN,Senegal,15854360,2018
+RS,Serbia,6982084,2018
+SC,Seychelles,96762,2018
+SL,Sierra Leone,7650154,2018
+SG,Singapore,5638676,2018
+SX,Sint Maarten (Dutch part),40654,2018
+SK,Slovak Republic,5447011,2018
+SI,Slovenia,2067372,2018
+SB,Solomon Islands,652858,2018
+SO,Somalia,15008154,2018
+ZA,South Africa,57779622,2018
+SS,South Sudan,10975920,2018
+ES,Spain,46723749,2018
+LK,Sri Lanka,21670000,2018
+KN,St. Kitts and Nevis,52441,2018
+LC,St. Lucia,181889,2018
+MF,St. Martin (French part),37264,2018
+VC,St. Vincent and the Grenadines,110210,2018
+SD,Sudan,41801533,2018
+SR,Suriname,575991,2018
+SE,Sweden,10183175,2018
+CH,Switzerland,8516543,2018
+SY,Syrian Arab Republic,16906283,2018
+TJ,Tajikistan,9100837,2018
+TZ,Tanzania,56318348,2018
+TH,Thailand,69428524,2018
+TL,Timor-Leste,1267972,2018
+TG,Togo,7889094,2018
+TO,Tonga,103197,2018
+TT,Trinidad and Tobago,1389858,2018
+TN,Tunisia,11565204,2018
+TR,Turkey,82319724,2018
+TM,Turkmenistan,5850908,2018
+TC,Turks and Caicos Islands,37665,2018
+TV,Tuvalu,11508,2018
+UG,Uganda,42723139,2018
+UA,Ukraine,44622516,2018
+AE,United Arab Emirates,9630959,2018
+GB,United Kingdom,66488991,2018
+US,United States,327167434,2018
+UY,Uruguay,3449299,2018
+UZ,Uzbekistan,32955400,2018
+VU,Vanuatu,292680,2018
+VE,"Venezuela, RB",28870195,2018
+VN,Vietnam,95540395,2018
+VI,Virgin Islands (U.S.),106977,2018
+PS,West Bank and Gaza,4569087,2018
+YE,"Yemen, Rep.",28498687,2018
+ZM,Zambia,17351822,2018
+ZW,Zimbabwe,14439018,2018
