@@ -52,8 +52,7 @@ prep_global <- function(df, pop){
     df$iso2c[df$country=="Kosovo"] <- "XK"
     
     #add population figures to global
-    df <- df %>% 
-        left_join(select(pop, population, iso2c), by = c("iso2c" = "iso2c"))
+    df <- df %>% left_join(select(pop, population, iso2c), by = c("iso2c" = "iso2c"))
     
     #reorder, calculate 'count_per_mil'
     df <- df %>% select(iso2c, country, population, date, count)
