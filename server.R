@@ -25,15 +25,19 @@ source("dsn_tools.R")
 # get new data structure release
 url_global_confirmed <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
 url_global_deaths <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
-url_pop <- 'https://raw.githubusercontent.com/anguyen1210/covid19-tracker/master/wdi_SP.POP.TOTL_2018.csv'
+
+url_pop_global <- 'https://raw.githubusercontent.com/anguyen1210/covid19-tracker/master/pop_global.csv'
+url_pop_national <- 'https://raw.githubusercontent.com/anguyen1210/covid19-tracker/master/pop_national.csv'
 
 global_confirmed <- read_csv(url(url_global_confirmed))
 global_deaths <- read_csv(url(url_global_deaths))
-pop <- read_csv(url(url_pop))
+
+pop_global <- read_csv(url(url_pop_global))
+pop_national <- read_csv(url(url_pop_national))
 
 # transform data
-global_confirmed <- prep_global(global_confirmed, pop) 
-global_deaths <- prep_global(global_deaths, pop) 
+global_confirmed <- prep_global(global_confirmed, pop_global) 
+global_deaths <- prep_global(global_deaths, pop_global) 
 
 # -------------------------------------------------------------------------------
 
