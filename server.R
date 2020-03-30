@@ -8,66 +8,73 @@
 # -------------------------------------------------------------------------------    
 
     
-#load required packages
-if(!require(shiny)) install.packages("shiny", repos = "http://cran.us.r-project.org")
-if(!require(shinyWidgets)) install.packages("shinyWidgets", repos = "http://cran.us.r-project.org")
-if(!require(readr)) install.packages("readr", repos = "http://cran.us.r-project.org")
-if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")
-if(!require(tidyr)) install.packages("tidyr", repos = "http://cran.us.r-project.org")
-if(!require(stringr)) install.packages("stringr", repos = "http://cran.us.r-project.org")
-if(!require(countrycode)) install.packages("countrycode", repos = "http://cran.us.r-project.org")
-if(!require(ggplot2)) install.packages("ggplot2", repos = "http://cran.us.r-project.org")
-if(!require(directlabels)) install.packages("directlabels", repos = "http://cran.us.r-project.org")
-
-# load custom functions and plotting theme
-source("dsn_tools.R")
-
-# get new data structure release
-url_global_confirmed <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
-url_global_deaths <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
-
-url_pop_global <- 'https://raw.githubusercontent.com/anguyen1210/covid19-tracker/master/pop_global.csv'
-url_pop_national <- 'https://raw.githubusercontent.com/anguyen1210/covid19-tracker/master/pop_national.csv'
-
-global_confirmed <- read_csv(url(url_global_confirmed))
-global_deaths <- read_csv(url(url_global_deaths))
-
-pop_global <- read_csv(url(url_pop_global))
-pop_national <- read_csv(url(url_pop_national))
-
-# transform data
-global_confirmed <- prep_global(global_confirmed, pop_global) 
-global_deaths <- prep_global(global_deaths, pop_global) 
-
-# -------------------------------------------------------------------------------
-
-
 shinyServer(function(input, output) {
     
     # Subset based on country selection
     
-    current_selection <- reactiveVal(list("Switzerland", "Spain", "US", "Italy"))
+    ## Set default global selection
+    current_selection_global <- reactiveVal(list("Switzerland", "Spain", "Italy", "US"))
     
-    observeEvent(input$country_from_dat, {
-        current_selection(input$country_from_dat)
+    observeEvent(input$country_from_global, {
+        current_selection_global(input$country_from_global)
+    })
+    
+    ## Set default national-country selection
+    current_selection_national <- reactiveVal("US")
+    
+    observeEvent(input$country_from_national, {
+        current_selection_national(input$country_from_national)
+    })
+    
+    ## Set default national-state selection
+    current_selection_state <- reactiveVal(list("New York", "Washington", "Texas", "Louisiana"))
+    
+    observeEvent(input$state_from_national, {
+        current_selection_state(input$state_from_national)
     })
 
-    output$choose_country <- renderUI({
-        selectizeInput("country_from_dat", 
+    # select countries, global
+    output$choose_country_global <- renderUI({
+        selectizeInput("country_from_global", 
                        "Country", 
                        choices = sort(as.character(global_confirmed$country)), 
-                       multiple=TRUE,
-                       selected = current_selection(),
+                       multiple = TRUE,
+                       selected = current_selection_global(),
                        options = list(maxItems = 6) 
                        )
     })
     
+    output$choose_country_national <- renderUI({
+        selectInput("country_from_national",
+                       "Country",
+                       choices = sort(as.character(national_confirmed$country)),
+                       multiple=FALSE,
+                       selected = current_selection_national()
+                       #options = list(maxItems = 6)
+        )
+    })
+    
+    output$choose_state_national <- renderUI({
+        selectizeInput("state_from_national", 
+                       "State/Province/Territory", 
+                       choices = national_confirmed %>% filter(country==input$country_from_national) %>% select(province_state) %>% arrange(province_state), 
+                       multiple = TRUE,
+                       selected = current_selection_state()
+                       #options = list(maxItems = 6) 
+                       )
+    })
+    
     dat_sub <- reactive({
-        if (input$radio_outcome == 1){
-            subset(global_confirmed, country %in% input$country_from_dat) %>% std_date_to_n(., input$num)
-        } else { 
-            subset(global_deaths, country %in% input$country_from_dat) %>% std_date_to_n(., input$num)
+        if (input$radio_level == 1 & input$radio_outcome == 1){
+            subset(global_confirmed, country %in% input$country_from_global) %>% std_date_to_n(., input$num, country)
+        } else if (input$radio_level == 1 & input$radio_outcome == 2) { 
+            subset(global_deaths, country %in% input$country_from_global) %>% std_date_to_n(., input$num, country)
+        } else if (input$radio_level == 2 & input$radio_outcome == 1) {
+            subset(national_confirmed, province_state %in% input$state_from_national) %>% std_date_to_n(., input$num, province_state)
+        } else {
+            subset(national_deaths, province_state %in% input$state_from_national) %>% std_date_to_n(., input$num, province_state)
         }
+        
     })
     
     # -------------------------------------------------------------------------
@@ -82,27 +89,51 @@ shinyServer(function(input, output) {
         pcaption <- paste0("Source: mentalbreaks.shinyapps.io/covid19/ \n Data/Access: JHU CSSE, ", format(Sys.time(), "%d %b %Y, %H:%M %Z")) 
     })
     
-    ptitle1 <- reactive({ 
+    ptitle_global <- reactive({ 
         if (input$radio_outcome==1 & input$radio_pop==1){
-            ptitle1 <- "Coronavirus COVID-19: Confirmed cases"
+            ptitle_global <- "Coronavirus COVID-19: Confirmed cases"
         } else if (input$radio_outcome==1 & input$radio_pop==2){
-            ptitle1 <- "Coronavirus COVID-19: Confirmed cases (per million habitants)"
+            ptitle_global <- "Coronavirus COVID-19: Confirmed cases (per million habitants)"
         } else if (input$radio_outcome==2 & input$radio_pop==1){
-            ptitle1 <- "Coronavirus COVID-19: Deaths"
+            ptitle_global <- "Coronavirus COVID-19: Deaths"
         } else {
-            ptitle1 <- "Coronavirus COVID-19: Deaths (per million habitants)"
+            ptitle_global <- "Coronavirus COVID-19: Deaths (per million habitants)"
         }
     })
     
-    ptitle2 <- reactive({ 
+    ptitle_global_log <- reactive({ 
         if (input$radio_outcome==1 & input$radio_pop==1){
-            ptitle2 <- "Coronavirus COVID-19: Confirmed cases (log scale)"
+            ptitle_global_log <- "Coronavirus COVID-19: Confirmed cases (log scale)"
         } else if (input$radio_outcome==1 & input$radio_pop==2){
-            ptitle2 <- "Coronavirus COVID-19: Confirmed cases (log scale, per million habitants)"
+            ptitle_global_log <- "Coronavirus COVID-19: Confirmed cases (log scale, per million habitants)"
         } else if (input$radio_outcome==2 & input$radio_pop==1){
-            ptitle2 <- "Coronavirus COVID-19: Deaths (log scale)"
+            ptitle_global_log <- "Coronavirus COVID-19: Deaths (log scale)"
         } else {
-            ptitle2 <- "Coronavirus COVID-19: Deaths (log scale, per million habitants)"
+            ptitle_global_log <- "Coronavirus COVID-19: Deaths (log scale, per million habitants)"
+        }
+    })
+    
+    ptitle_national <- reactive({ 
+        if (input$radio_outcome==1 & input$radio_pop==1){
+            ptitle_national <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Confirmed cases")
+        } else if (input$radio_outcome==1 & input$radio_pop==2){
+            ptitle_national <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Confirmed cases (per 100K habitants)")
+        } else if (input$radio_outcome==2 & input$radio_pop==1){
+            ptitle_national <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Deaths")
+        } else {
+            ptitle_national <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Deaths (per 100K habitants)")
+        }
+    })
+    
+    ptitle_national_log <- reactive({ 
+        if (input$radio_outcome==1 & input$radio_pop==1){
+            ptitle_national_log <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Confirmed cases (log scale)")
+        } else if (input$radio_outcome==1 & input$radio_pop==2){
+            ptitle_national_log <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Confirmed cases (log scale, per 100K habitants)")
+        } else if (input$radio_outcome==2 & input$radio_pop==1){
+            ptitle_national_log <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Deaths (log scale)")
+        } else {
+            ptitle_national_log <- paste0("Coronavirus COVID-19: ", input$country_from_national, ", Deaths (log scale, per 100K habitants)")
         }
     })
     
@@ -123,126 +154,87 @@ shinyServer(function(input, output) {
         dat_sub()
     })
     
-    total_vs_country <- reactive({
-        if (input$radio_lsetting==1 & input$radio_pop==1){
-            p1 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle1()) +
-                ylab("Total") +
-                xlab(xlabel())+
-                labs(caption = pcaption())
-        } else if (input$radio_lsetting==1 & input$radio_pop==2){
-            p1 <- ggplot(dat_sub(), aes(x=days_since_n, y=count_per_mil, group = country, color=country)) +
-                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle1()) +
-                ylab("Total") +
-                xlab(xlabel())+
-                labs(caption = pcaption())
-        } else if (input$radio_lsetting==2 & input$radio_pop==1){
-            p1 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle1()) +
-                ylab("Total") +
-                xlab(xlabel())+
-                labs(caption = pcaption())
+    cumtotal <- reactive({
+        #global plots
+        if (input$radio_level == 1 & input$radio_lsetting==1 & input$radio_pop==1){
+            p1 <- plot_line(dat_sub(), days_since_n, count, country, country, 
+                              ptitle_global(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 1 & input$radio_lsetting==1 & input$radio_pop==2){
+            p1 <- plot_line(dat_sub(), days_since_n, count_per_mil, country, country, 
+                            ptitle_global(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 1 & input$radio_lsetting==2 & input$radio_pop==1){
+            p1 <- plot_smooth(dat_sub(), days_since_n, count, country, country, 
+                            ptitle_global(), xlabel(), pcaption())
+                
+        } else  if (input$radio_level == 1 & input$radio_lsetting==2 & input$radio_pop==2){
+            p1 <- plot_smooth(dat_sub(), days_since_n, count_per_mil, country, country, 
+                              ptitle_global(), xlabel(), pcaption())
+            
+        } else if (input$radio_level == 2 & input$radio_lsetting==1 & input$radio_pop==1) {
+        #national plots
+            p1 <- plot_line(dat_sub(), days_since_n, count, province_state, province_state, 
+                            ptitle_national(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 2 & input$radio_lsetting==1 & input$radio_pop==2){
+            p1 <- plot_line(dat_sub(), days_since_n, count_per_100k, province_state, province_state, 
+                            ptitle_national(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 2 & input$radio_lsetting==2 & input$radio_pop==1){
+            p1 <- plot_smooth(dat_sub(), days_since_n, count, province_state, province_state, 
+                            ptitle_national(), xlabel(), pcaption())
+            
         } else {
-            p1 <- ggplot(dat_sub(), aes(x=days_since_n, y=count_per_mil, group = country, color=country)) +
-                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle1()) +
-                ylab("Total") +
-                xlab(xlabel())+
-                labs(caption = pcaption())
+            p1 <- plot_smooth(dat_sub(), days_since_n, count_per_100k, province_state, province_state, 
+                              ptitle_national(), xlabel(), pcaption())
         }
-        
     })
     
     output$plot1 <- renderPlot({
-        print(total_vs_country())
+        print(cumtotal())
     })
     
-    logtotal_vs_country <- reactive({
-        if (input$radio_lsetting==1 & input$radio_pop==1){
-            p2 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_log10(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle2()) +
-                ylab("Total (log scale)") +
-                xlab(xlabel()) +
-                labs(caption = pcaption())
-        } else if (input$radio_lsetting==1 & input$radio_pop==2){
-            p2 <- ggplot(dat_sub(), aes(x=days_since_n, y=count_per_mil, group = country, color=country)) +
-                geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_log10(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle2()) +
-                ylab("Total (log scale)") +
-                xlab(xlabel()) +
-                labs(caption = pcaption())
-        } else if (input$radio_lsetting==2 & input$radio_pop==1){
-            p2 <- ggplot(dat_sub(), aes(x=days_since_n, y=count, group = country, color=country)) +
-                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_log10(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle2()) +
-                ylab("Total (log scale)") +
-                xlab(xlabel()) +
-                labs(caption = pcaption())
+    logtotal <- reactive({
+        #global log scale
+        if (input$radio_level == 1 & input$radio_lsetting==1 & input$radio_pop==1){
+            p2 <- plot_line_log(dat_sub(), days_since_n, count, country, country, 
+                            ptitle_global_log(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 1 & input$radio_lsetting==1 & input$radio_pop==2){
+            p2 <- plot_line_log(dat_sub(), days_since_n, count_per_mil, country, country, 
+                                ptitle_global_log(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 1 & input$radio_lsetting==2 & input$radio_pop==1){
+            p2 <- plot_smooth_log(dat_sub(), days_since_n, count, country, country, 
+                                ptitle_global_log(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 1 & input$radio_lsetting==2 & input$radio_pop==2){
+            p2 <- plot_smooth_log(dat_sub(), days_since_n, count_per_mil, country, country, 
+                                  ptitle_global_log(), xlabel(), pcaption())
+            
+        } else if (input$radio_level == 2 & input$radio_lsetting==1 & input$radio_pop==1){
+        # national log scale
+            p2 <- plot_line_log(dat_sub(), days_since_n, count, province_state, province_state, 
+                                ptitle_national_log(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 2 & input$radio_lsetting==1 & input$radio_pop==2){
+            p2 <- plot_line_log(dat_sub(), days_since_n, count_per_100k, province_state, province_state, 
+                                ptitle_national_log(), xlabel(), pcaption())
+                
+        } else if (input$radio_level == 2 & input$radio_lsetting==2 & input$radio_pop==1){
+            p2 <- plot_smooth_log(dat_sub(), days_since_n, count, province_state, province_state, 
+                                ptitle_national_log(), xlabel(), pcaption())
+                
         } else {
-            p2 <- ggplot(dat_sub(), aes(x=days_since_n, y=count_per_mil, group = country, color=country)) +
-                geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
-                geom_point(aes(shape=country), alpha= 0.4, show.legend = FALSE) +
-                theme_lineplot() +
-                scale_color_brewer(palette="Dark2") +
-                scale_x_continuous(limits = c(min(dat_sub()$days_since_n), max(dat_sub()$days_since_n)+3)) +
-                scale_y_log10(labels = function(x) format(x, scientific = FALSE)) +
-                geom_dl(aes(label=country), method=list(dl.trans(x = x + 0.2), "last.bumpup", cex = .6)) +
-                ggtitle(ptitle2()) +
-                ylab("Total (log scale)") +
-                xlab(xlabel()) +
-                labs(caption = pcaption())
+            p2 <- plot_smooth_log(dat_sub(), days_since_n, count_per_100k, province_state, province_state, 
+                                ptitle_national_log(), xlabel(), pcaption())
         }
         
     })
     
     output$plot2 <- renderPlot({
-        print(logtotal_vs_country())
+        print(logtotal())
     })
     # -------------------------------------------------------------------------
     
@@ -262,7 +254,7 @@ shinyServer(function(input, output) {
             paste0(input$plot1, "plot_total_", format(Sys.time(), "%Y%m%d"), ".png", sep = "") 
             },
         content = function(file) {
-            ggsave(file, plot = total_vs_country(), device = "png", width=7, height =5)
+            ggsave(file, plot = cumtotal(), device = "png", width=7, height =5)
         }
     )
     
@@ -271,7 +263,7 @@ shinyServer(function(input, output) {
             paste0(input$plot2, "plot_logtotal_", format(Sys.time(), "%Y%m%d"), ".png", sep = "") 
         },
         content = function(file) {
-            ggsave(file, plot = logtotal_vs_country(), device = "png", width=7, height =5)
+            ggsave(file, plot = logtotal(), device = "png", width=7, height =5)
         }
     )
     

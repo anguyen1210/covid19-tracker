@@ -7,8 +7,6 @@
 # 
 # -------------------------------------------------------------------------------    
 
-library(shiny)
-library(shinyWidgets)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -26,8 +24,25 @@ shinyUI(fluidPage(
                      radioButtons("radio_outcome", label = "Outcome",
                                   choices = list("confirmed cases" = 1, "deaths" = 2),  #, "recovered" = 3
                                   selected = 1, inline=TRUE),
-            
-                     uiOutput("choose_country"),
+                     
+                     radioButtons("radio_level", label = "Observation level",
+                                  choices = list("global" = 1, "national" = 2),  #, "recovered" = 3
+                                  selected = 1, inline=TRUE),
+                     
+                     conditionalPanel(condition = "input.radio_level==1",
+                                      uiOutput("choose_country_global")
+                                    ),
+                     
+                     conditionalPanel(condition = "input.radio_level==2",
+                                      selectInput("country_from_national",
+                                                         "Country",
+                                                         choices = sort(as.character(unique(national_confirmed$country))), #c("Australia", "Canada", "China", "US"),
+                                                         multiple = FALSE,
+                                                         selected = "US"
+                                                         ),
+                                      # uiOutput("choose_country_national"),
+                                      uiOutput("choose_state_national")
+                                    ),
                      hr(), 
                      
                      h3("Normalize data"),
@@ -44,13 +59,12 @@ shinyUI(fluidPage(
                      hr(),
                      
                      strong("Source:"),
-                     p("The global data for this app is made public by the Johns Hopkins
-                       Center for Systems Science and Engineering (JHU CSSE) and is ", 
-                       a("available on Github. ", href="https://github.com/CSSEGISandData/COVID-19"),
-                       "Additional information about the data and its collection is available on the ",
+                     p(a("Global data", href="https://github.com/CSSEGISandData/COVID-19"), " for this app is made available by the Johns Hopkins
+                       Center for Systems Science and Engineering (JHU CSSE). Additional information about the data and its collection is available on the ",
                        a("JHU CSSE 'Mapping 2019-nCov' blog post.",
                          href = "https://systems.jhu.edu/research/public-health/ncov/")),
-                     p("Population data taken from the ",
+                     p(a("US data", href="https://github.com/nytimes/covid-19-data"), " provided by the New York Times"),
+                     p("Global population data taken from the ",
                        a("World Bank WDI database,", href="https://databank.worldbank.org/source/world-development-indicators"),
                        "current as of 2018."),
                      br(),
