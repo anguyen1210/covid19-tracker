@@ -124,6 +124,53 @@ prep_national_nyt <- function(df_nyt, pop, outcome){
 }
 
 
+prep_national_es <- function(df_es, pop, outcome_es){
+    
+    outcome <- enquo(outcome_es)
+    
+    #select cols from nyt data
+    df <- df_es %>% select(`CCAA Codigo ISO`, Fecha, !!outcome)
+    df <- df %>% filter(!is.na(Fecha))
+    df$`CCAA Codigo ISO` <- str_replace_all(df$`CCAA Codigo ISO`, "ME", "ML")
+    df$iso3166_2 <- paste0("ES-", df$`CCAA Codigo ISO`)                             
+    df <- df %>% select(-`CCAA Codigo ISO`)
+    
+    names(df) <- c("date", "count", "iso3166_2")
+    df$date <- as.Date.character(df$date)
+    df$date <- format(df$date,"%m/%d/%y")
+    
+    df <- df %>% left_join(select(pop_national, iso3166_2, country, province_state, pop_province_state), by = c("iso3166_2" = "iso3166_2"))
+    
+    #reorder final columns
+    df <- df %>% select(iso3166_2, country, province_state, pop_province_state, date, count)
+    
+    #add count_per_100k
+    df$count_per_100k <- df$count/df$pop_province_state * 100000
+    
+    return(df)
+}
+
+
+prep_national_ch <- function(df_ch_outcome, pop){
+    
+    df <- df_ch_outcome %>% select(-CH)
+    df <- df %>% pivot_longer(-Date, names_to = "iso3166_2", values_to = "count") 
+    df$iso3166_2 <- paste0("CH-", df$iso3166_2)
+    df <- df %>% rename(date = "Date")
+    df$date <- format(df$date,"%m/%d/%y")
+    
+    df <- df %>% left_join(select(pop_national, iso3166_2, country, province_state, pop_province_state), by = c("iso3166_2" = "iso3166_2"))
+    
+    #reorder final columns
+    df <- df %>% select(iso3166_2, country, province_state, pop_province_state, date, count)
+    
+    #add count_per_100k
+    df$count_per_100k <- df$count/df$pop_province_state * 100000
+    
+    return(df)
+}
+
+
 #creates a new column in the reshaped (long) df, counting days since confirmed \geq n
 std_date_to_n <- function(df, n, grouping_var){
     
@@ -135,6 +182,30 @@ std_date_to_n <- function(df, n, grouping_var){
         mutate('days_since_n' = row_number()-1)
     
     return(df)
+}
+
+
+#function to get a df with arbitrary number of reference lines
+get_ref_dt_counts <-function(dat_sub, ...){
+    doublingtime <- c(...)
+    ref_dt_counts <- as_tibble()
+    max_y <- max(dat_sub$count)
+    
+    for (i in doublingtime){
+        temp <- tibble(
+            country = NA,
+            doubling_time = i,
+            count = cumprod(c(min(dat_sub$count), 
+                              rep(1+(log(2)/i), max(dat_sub$days_since_n)))),
+            days_since_n = 0:max(dat_sub$days_since_n), 
+            ref_label = paste0(i, " day", "\ndoubling time")
+        )
+        ref_dt_counts <- rbind(ref_dt_counts, temp)
+    }
+    
+    ref_dt_counts <- ref_dt_counts %>% filter(count <= max_y)  
+    
+    return(ref_dt_counts)
 }
 
 
@@ -164,8 +235,8 @@ plot_line <- function(df, x, y, group, color, title_input, xlab_input, caption_i
     color <- enquo(color)
     
     ggplot(df, aes(!!x, !!y, group =!!group, color=!!color)) +
-        geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
         geom_point(aes(shape=!!group), alpha= 0.4, show.legend = FALSE) +
+        geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
         theme_lineplot() +
         scale_color_brewer(palette="Dark2") +
         scale_x_continuous(limits = c(suppressWarnings(min(df$days_since_n)), suppressWarnings(max(df$days_since_n)+3))) +
@@ -187,6 +258,7 @@ plot_smooth <- function(df, x, y, group, color, title_input, xlab_input, caption
     color <- enquo(color)
     
     ggplot(df, aes(!!x, !!y, group =!!group, color=!!color)) +
+        geom_point(aes(shape=!!group), alpha= 0.4, show.legend = FALSE) +
         geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
         theme_lineplot() +
         scale_color_brewer(palette="Dark2") +
@@ -209,8 +281,8 @@ plot_line_log <- function(df, x, y, group, color, title_input, xlab_input, capti
     color <- enquo(color)
     
     ggplot(df, aes(!!x, !!y, group =!!group, color=!!color)) +
-        geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
         geom_point(aes(shape=!!group), alpha= 0.4, show.legend = FALSE) +
+        geom_line(size=.5, alpha=0.6, show.legend = FALSE) +
         theme_lineplot() +
         scale_color_brewer(palette="Dark2") +
         scale_x_continuous(limits = c(suppressWarnings(min(df$days_since_n)), suppressWarnings(max(df$days_since_n)+3))) +
@@ -231,6 +303,7 @@ plot_smooth_log <- function(df, x, y, group, color, title_input, xlab_input, cap
     color <- enquo(color)
     
     ggplot(df, aes(!!x, !!y, group =!!group, color=!!color)) +
+        geom_point(aes(shape=!!group), alpha= 0.4, show.legend = FALSE) +
         geom_smooth(method='loess', se=FALSE, size=.5, alpha=0.6, show.legend = FALSE) +
         theme_lineplot() +
         scale_color_brewer(palette="Dark2") +
@@ -251,17 +324,22 @@ plot_smooth_log <- function(df, x, y, group, color, title_input, xlab_input, cap
 # links to current data
 url_global_confirmed <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
 url_global_deaths <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
-url_nyt_states <- 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+url_national_nyt_states <- 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+url_national_es <- 'https://covid19.isciii.es/resources/serie_historica_acumulados.csv' 
+url_national_ch_confirmed <- 'https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/master/covid19_cases_switzerland_openzh.csv'
+url_national_ch_deaths <- 'https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/master/covid19_fatalities_switzerland_openzh.csv'
 
 # read in data
 global_confirmed_raw <- read_csv(url(url_global_confirmed), col_types=cols())
 global_deaths_raw <- read_csv(url(url_global_deaths), col_types=cols())
-national_nyt <- read_csv(url(url_nyt_states), col_types=cols())
+national_nyt <- read_csv(url(url_national_nyt_states), col_types=cols())
+national_es <- suppressWarnings(read_csv(url(url_national_es), col_types=cols())) #extra blank column added to end throwing up warnings
+national_ch_confirmed <- read_csv(url(url_national_ch_confirmed), col_types=cols())
+national_ch_deaths <- read_csv(url(url_national_ch_deaths), col_types=cols())
 
 # read in population tables
 pop_global <- read_csv(file = "pop_global.csv", col_types=cols())
-pop_national <- read_csv(file = "pop_national.csv", col_types=cols())
-pop_national_us <- read_csv(file = "pop_national_us.csv", col_types=cols())
+pop_national <- read_csv(file="pop_national.csv", locale = locale(encoding = "latin1"), col_types=cols())
 
 # transform data
 ##global
@@ -269,14 +347,23 @@ global_confirmed <- prep_global(global_confirmed_raw, pop_global)
 global_deaths <- prep_global(global_deaths_raw, pop_global) 
 
 ## national data
+#AUS, CAN, CHN
 national_confirmed <- prep_national(global_confirmed_raw, pop_national)
 national_deaths <- prep_national(global_deaths_raw, pop_national)
 
-national_confirmed_us <- prep_national_nyt(national_nyt, pop_national_us, cases)
-national_deaths_us <- prep_national_nyt(national_nyt, pop_national_us, deaths)
+#US
+national_confirmed_us <- prep_national_nyt(national_nyt, pop_national, cases)
+national_deaths_us <- prep_national_nyt(national_nyt, pop_national, deaths)
+
+#ES
+national_confirmed_es <- prep_national_es(national_es, pop_national, Casos)
+national_deaths_es <- prep_national_es(national_es, pop_national, Fallecidos)
+
+#CH
+national_confirmed_ch <- prep_national_ch(national_ch_confirmed, pop_national)
+national_deaths_ch <- prep_national_ch(national_ch_deaths, pop_national)
 
 ##merge jhu and nyt national data
-national_confirmed <- bind_rows(national_confirmed, national_confirmed_us)
-national_deaths <- bind_rows(national_deaths, national_deaths_us)
-
+national_confirmed <- bind_rows(national_confirmed, national_confirmed_us, national_confirmed_es, national_confirmed_ch)
+national_deaths <- bind_rows(national_deaths, national_deaths_us, national_deaths_es, national_deaths_ch)
 

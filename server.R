@@ -77,6 +77,24 @@ shinyServer(function(input, output) {
         
     })
     
+    ref_numbers <- reactive({
+        if (input$radio_ref==1){
+            input$ref_num1_1
+        } else if (input$radio_ref==2) { 
+            c(input$ref_num2_1, input$ref_num2_2)
+        } else if (input$radio_ref==3) {
+            c(input$ref_num3_1, input$ref_num3_2, input$ref_num3_3)
+        }
+        
+    })
+    
+    ref_df <- reactive({
+        if (input$radio_ref != 0){
+            get_ref_dt_counts(dat_sub(), ref_numbers())
+        }
+        
+    })
+    
     # -------------------------------------------------------------------------
     
     # Define plotting elements: timestamp, custom title/labels, line settings
@@ -86,7 +104,7 @@ shinyServer(function(input, output) {
     })
     
     pcaption <- reactive({
-        pcaption <- paste0("Source: mentalbreaks.shinyapps.io/covid19/ \n Data/Access: JHU CSSE, ", format(Sys.time(), "%d %b %Y, %H:%M %Z")) 
+        pcaption <- paste0("mentalbreaks.shinyapps.io/covid19/ \n Data accessed: ", format(Sys.time(), "%d %b %Y, %H:%M %Z")) 
     })
     
     ptitle_global <- reactive({ 
@@ -153,6 +171,11 @@ shinyServer(function(input, output) {
     output$dat_table <- renderTable({
         dat_sub()
     })
+    
+    # #option to render this table for checks
+    # output$ref_table <- renderTable({
+    #     ref_df()
+    # })
     
     cumtotal <- reactive({
         #global plots
@@ -233,9 +256,28 @@ shinyServer(function(input, output) {
         
     })
     
-    output$plot2 <- renderPlot({
-        print(logtotal())
+    logtotal_ref <- reactive({
+        if (input$radio_ref!=0) {
+            p2_ref <- logtotal()
+            p2_ref$layers <- c(geom_line(data=ref_df(), aes(x=days_since_n, y=count, group=ref_label, linetype=ref_label), color="grey80", alpha=0.7),
+                           geom_text(data=ref_df() %>% group_by(ref_label) %>% slice(which.max(count)),
+                                     aes(x=days_since_n +2, y=count, group=ref_label, label=ref_label),
+                                     color="grey80", alpha=0.8, size=2.25),
+                           p2_ref$layers)
+            p2_ref
+        }
+        
     })
+    
+    output$plot2 <- renderPlot({
+        if (input$radio_ref!=0 & input$radio_pop==1){
+            print(logtotal_ref())
+        }
+        else {
+            print(logtotal())
+        }
+    })
+    
     # -------------------------------------------------------------------------
     
     # Define download functionality
