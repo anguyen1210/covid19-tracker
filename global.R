@@ -65,7 +65,11 @@ prep_global <- function(df, pop){
     
     #reorder, calculate 'count_per_mil'
     df <- df %>% select(iso2c, country, population, date, count)
+    df$date <- as.Date(df$date, format = "%m/%d/%y")
     df$count_per_mil <- df$count/df$population * 1000000
+    
+    #diff for daily increase
+    df <- df %>% group_by(country) %>% mutate(diff = count - lag(count))
     
     return(df)
 }
@@ -93,7 +97,11 @@ prep_national <- function(df, pop){
     
     #reorder, calculate 'count_per_100k'
     df_nat <- df_nat %>% select(iso3166_2, country, province_state, pop_province_state, date, count)
+    df_nat$date <- as.Date(df_nat$date, format = "%m/%d/%y")
     df_nat$count_per_100k <- df_nat$count/df_nat$pop_province_state * 100000
+    
+    #diff for daily increase
+    df_nat <- df_nat %>% group_by(province_state) %>% mutate(diff = count - lag(count))
     
     return(df_nat)
 }
@@ -107,7 +115,7 @@ prep_national_nyt <- function(df_nyt, pop, outcome){
     df_us <- df_nyt %>% select(state, date, !!outcome)
     
     #format data to be consistent with 'national' table
-    df_us$date <- format(df_us$date,"%m/%d/%y")
+    #df_us$date <- format(df_us$date,"%m/%d/%y")
     df_us$country <- "US" 
     names(df_us) <- c("province_state", "date", "count", "country")
     
@@ -120,6 +128,9 @@ prep_national_nyt <- function(df_nyt, pop, outcome){
     #add count_per_100k
     df_us$count_per_100k <- df_us$count/df_us$pop_province_state * 100000
     
+    #diff for daily increase
+    df_us <- df_us %>% group_by(province_state) %>% mutate(diff = count - lag(count))
+    
     return(df_us)
 }
 
@@ -129,15 +140,15 @@ prep_national_es <- function(df_es, pop, outcome_es){
     outcome <- enquo(outcome_es)
     
     #select cols from nyt data
-    df <- df_es %>% select(`CCAA Codigo ISO`, Fecha, !!outcome)
-    df <- df %>% filter(!is.na(Fecha))
-    df$`CCAA Codigo ISO` <- str_replace_all(df$`CCAA Codigo ISO`, "ME", "ML")
-    df$iso3166_2 <- paste0("ES-", df$`CCAA Codigo ISO`)                             
-    df <- df %>% select(-`CCAA Codigo ISO`)
+    df <- df_es %>% select(CCAA, FECHA, !!outcome)
+    df <- df %>% filter(!is.na(FECHA))
+    df$CCAA <- str_replace_all(df$CCAA, "ME", "ML")
+    df$iso3166_2 <- paste0("ES-", df$CCAA)                             
+    df <- df %>% select(-CCAA)
     
     names(df) <- c("date", "count", "iso3166_2")
-    df$date <- as.Date.character(df$date)
-    df$date <- format(df$date,"%m/%d/%y")
+    df$date <- as.Date(df$date, format = "%d/%m/%Y")
+    #df$date <- format(df$date,"%m/%d/%y")
     
     df <- df %>% left_join(select(pop_national, iso3166_2, country, province_state, pop_province_state), by = c("iso3166_2" = "iso3166_2"))
     
@@ -146,6 +157,9 @@ prep_national_es <- function(df_es, pop, outcome_es){
     
     #add count_per_100k
     df$count_per_100k <- df$count/df$pop_province_state * 100000
+    
+    #diff for daily increase
+    df <- df %>% group_by(province_state) %>% mutate(diff = count - lag(count))
     
     return(df)
 }
@@ -157,7 +171,7 @@ prep_national_ch <- function(df_ch_outcome, pop){
     df <- df %>% pivot_longer(-Date, names_to = "iso3166_2", values_to = "count") 
     df$iso3166_2 <- paste0("CH-", df$iso3166_2)
     df <- df %>% rename(date = "Date")
-    df$date <- format(df$date,"%m/%d/%y")
+    #df$date <- format(df$date,"%m/%d/%y")
     
     df <- df %>% left_join(select(pop_national, iso3166_2, country, province_state, pop_province_state), by = c("iso3166_2" = "iso3166_2"))
     
@@ -166,6 +180,9 @@ prep_national_ch <- function(df_ch_outcome, pop){
     
     #add count_per_100k
     df$count_per_100k <- df$count/df$pop_province_state * 100000
+    
+    #diff for daily increase
+    df <- df %>% group_by(province_state) %>% mutate(diff = count - lag(count))
     
     return(df)
 }
@@ -333,7 +350,7 @@ url_national_ch_deaths <- 'https://raw.githubusercontent.com/daenuprobst/covid19
 global_confirmed_raw <- read_csv(url(url_global_confirmed), col_types=cols())
 global_deaths_raw <- read_csv(url(url_global_deaths), col_types=cols())
 national_nyt <- read_csv(url(url_national_nyt_states), col_types=cols())
-national_es <- suppressWarnings(read_csv(url(url_national_es), col_types=cols())) #extra blank column added to end throwing up warnings
+national_es <- suppressWarnings(read_csv(url(url_national_es), col_types=cols(), locale = locale(encoding = 'LATIN1'))) #extra blank column added to end throwing up warnings
 national_ch_confirmed <- read_csv(url(url_national_ch_confirmed), col_types=cols())
 national_ch_deaths <- read_csv(url(url_national_ch_deaths), col_types=cols())
 
@@ -356,7 +373,7 @@ national_confirmed_us <- prep_national_nyt(national_nyt, pop_national, cases)
 national_deaths_us <- prep_national_nyt(national_nyt, pop_national, deaths)
 
 #ES
-national_confirmed_es <- prep_national_es(national_es, pop_national, Casos)
+national_confirmed_es <- prep_national_es(national_es, pop_national, CASOS)
 national_deaths_es <- prep_national_es(national_es, pop_national, Fallecidos)
 
 #CH

@@ -169,13 +169,11 @@ shinyServer(function(input, output) {
     # Render subsetted table and plots
     
     output$dat_table <- renderTable({
-        dat_sub()
+        display_table <- dat_sub()
+        display_table$date <- as.character(display_table$date)
+        display_table
     })
     
-    # #option to render this table for checks
-    # output$ref_table <- renderTable({
-    #     ref_df()
-    # })
     
     cumtotal <- reactive({
         #global plots

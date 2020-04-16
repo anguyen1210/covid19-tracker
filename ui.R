@@ -23,7 +23,7 @@ shinyUI(fluidPage(
                      h3("Select variables"),
                      radioButtons("radio_outcome", label = "Outcome",
                                   choices = list("confirmed cases" = 1, "deaths" = 2),  #, "recovered" = 3
-                                  selected = 1, inline=TRUE),
+                                  selected = 2, inline=TRUE),
                      
                      radioButtons("radio_level", label = "Observation level",
                                   choices = list("global" = 1, "national" = 2),  #, "recovered" = 3
@@ -49,7 +49,7 @@ shinyUI(fluidPage(
                      radioButtons("radio_pop", label = "Y-axis: total",
                                   choices = list("absolute" = 1, "population adjusted" = 2),
                                   selected = 1, inline=TRUE), 
-                     numericInput("num", label = "X-axis: days since outcome \u2265 ", value = 100),
+                     numericInput("num", label = "X-axis: days since outcome \u2265 ", value = 10),
                      hr(),
                      
                      h3("Customize plot"),
