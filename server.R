@@ -50,7 +50,6 @@ shinyServer(function(input, output) {
                        choices = sort(as.character(national_confirmed$country)),
                        multiple=FALSE,
                        selected = current_selection_national()
-                       #options = list(maxItems = 6)
         )
     })
     
@@ -59,8 +58,8 @@ shinyServer(function(input, output) {
                        "State/Province/Territory", 
                        choices = national_confirmed %>% filter(country==input$country_from_national) %>% select(province_state) %>% arrange(province_state), 
                        multiple = TRUE,
-                       selected = current_selection_state()
-                       #options = list(maxItems = 6) 
+                       selected = current_selection_state(),
+                       options = list(maxItems = 6) 
                        )
     })
     
@@ -73,6 +72,19 @@ shinyServer(function(input, output) {
             subset(national_confirmed, province_state %in% input$state_from_national) %>% std_date_to_n(., input$num, province_state)
         } else {
             subset(national_deaths, province_state %in% input$state_from_national) %>% std_date_to_n(., input$num, province_state)
+        }
+        
+    })
+    
+    dat_sub2 <- reactive({
+        if (input$radio_level == 1 & input$radio_outcome == 1){
+            subset(global_confirmed, country %in% input$country_from_global) %>% prep_dailyplot(., "2020-02-01", country)
+        } else if (input$radio_level == 1 & input$radio_outcome == 2) { 
+            subset(global_deaths, country %in% input$country_from_global) %>% prep_dailyplot(., "2020-02-01", country)
+        } else if (input$radio_level == 2 & input$radio_outcome == 1) {
+            subset(national_confirmed, province_state %in% input$state_from_national) %>% prep_dailyplot(., "2020-02-01", province_state)
+        } else {
+            subset(national_deaths, province_state %in% input$state_from_national) %>% prep_dailyplot(., "2020-02-01", province_state)
         }
         
     })
@@ -160,6 +172,14 @@ shinyServer(function(input, output) {
             xlabel <- paste0("Days since confirmed cases \u2265 ", input$num)
         } else {
             xlabel <- paste0("Days since deaths \u2265 ", input$num)
+        }
+    })
+    
+    dailytitle <- reactive({ 
+        if (input$radio_outcome==1){
+            dailytitle <- "Daily confirmed new cases"
+        } else {
+            dailytitle <- "Daily confirmed new deaths"
         }
     })
     
@@ -275,6 +295,25 @@ shinyServer(function(input, output) {
             print(logtotal())
         }
     })
+    
+    dailytotal <- reactive({
+        if (input$radio_level == 1){
+            p3 <- plot_col(dat_sub2(), country, country, dailytitle(), pcaption())
+        } else {
+            p3 <- plot_col(dat_sub2(), province_state, province_state, dailytitle(), pcaption())
+        }
+    })
+    
+    output$plot3 <- renderPlot({
+        print(dailytotal())
+    }, height = function(){
+        if (input$radio_level == 1){
+            200*n_distinct(input$country_from_global)
+        } else {
+        200*n_distinct(input$state_from_national)
+        }
+        }
+    )
     
     # -------------------------------------------------------------------------
     

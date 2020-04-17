@@ -94,7 +94,7 @@ shinyUI(fluidPage(
                     ),
         mainPanel(
             tabsetPanel(
-                tabPanel("Plot", 
+                tabPanel("Accumulated", 
                          #fluidRow(...)
                          br(),
                          plotOutput("plot1"),
@@ -116,6 +116,12 @@ shinyUI(fluidPage(
                                  up = TRUE
                                 )
                             )
+                         ),
+                
+                tabPanel("Daily",
+                         br(),
+                         plotOutput("plot3", height="auto")
+                    
                          ),
                 
                 tabPanel("Data",

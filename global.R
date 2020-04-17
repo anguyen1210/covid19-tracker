@@ -202,6 +202,20 @@ std_date_to_n <- function(df, n, grouping_var){
 }
 
 
+#cuts the data for all points before 'date', adds column with 5-day moving average
+prep_dailyplot <- function(df, date_start, grouping_var){
+    
+    grouping_var <- enquo(grouping_var)
+    
+    df <- df %>% filter(date >= date_start) 
+    
+    df <- df %>% group_by(!!grouping_var) %>% 
+        mutate(MA_5d = caTools::runmean(diff, 5))
+    
+    return(df)
+}
+
+
 #function to get a df with arbitrary number of reference lines
 get_ref_dt_counts <-function(dat_sub, ...){
     doublingtime <- c(...)
@@ -330,6 +344,25 @@ plot_smooth_log <- function(df, x, y, group, color, title_input, xlab_input, cap
         ggtitle(title_input) +
         ylab("Total (log scale)") +
         xlab(xlab_input)+
+        labs(caption = caption_input)
+}
+
+#define plotting function: geom_col
+plot_col <- function(df, group, fill, title_input, caption_input){  #xlab_input
+    
+    group <- enquo(group)
+    fill <- enquo(fill)
+    
+    ggplot(df, aes(x=date, y=diff, group=!!group, fill=!!fill)) + 
+        geom_col(alpha=.6) +
+        geom_line(aes(x=date, y=MA_5d), color="Grey30") +
+        facet_wrap(group, scales="free_y", ncol=1) +
+        theme_lineplot() +
+        scale_fill_brewer(palette="Dark2") +
+        scale_x_date(date_breaks = "14 days" , date_labels = "%b-%d") +
+        ggtitle(title_input) +
+        ylab("Total") +
+        xlab("Date") +
         labs(caption = caption_input)
 }
 
