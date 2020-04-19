@@ -122,11 +122,11 @@ shinyUI(fluidPage(
                          br(),
                          h3("Daily totals"),
                          p("The figure(s) below show the number of new confirmed cases/deaths per day
-                           in the selected country or province/state unit. Each bar in the respective
+                           in the selected country or province/state unit. Each colored bar in the respective
                            plot corresponds to the actual number of new daily cases/deaths. The solid
-                           trend line is a 5-day moving average of the daily totals. Currently, the
-                           totals of all countries or province/state units are plotted from 1 February
-                           2020 onwards."),
+                           trend line is a 5-day moving average of the daily totals. The y-axis of each plot 
+                           is scaled to match the totals of the actual data. Currently, the totals of 
+                           all countries or province/state units are plotted from 1 February 2020 onwards."),
                          br(),
                          plotOutput("plot3", height="auto")
                          ),

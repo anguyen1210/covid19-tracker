@@ -240,13 +240,31 @@ get_ref_dt_counts <-function(dat_sub, ...){
 }
 
 
-#define plotting theme
+#define theme for line plots
 theme_lineplot <- function(...){
     theme_minimal() +
         theme(
             text = element_text(family = "sans", color = "#22211d"), 
             plot.caption = element_text(color = "#22211d", size=6),
             legend.position = "none",
+            panel.grid.minor.x = element_blank(),
+            panel.grid.major.x = element_blank(),
+            axis.line.x = element_line(color = "#22211d", 
+                                       size = .25, linetype = "solid"),
+            #plot.background = element_rect(fill = "#f5f5f2", color = NA) 
+            panel.background = element_rect(fill = "#f5f5f2", color = NA)
+        ) 
+}
+
+
+#define them for bar plots
+theme_barplot <- function(...){
+    theme_minimal() +
+        theme(
+            text = element_text(family = "sans", color = "#22211d"), 
+            plot.caption = element_text(color = "#22211d", size=6),
+            legend.position = "bottom",
+            legend.key.size = unit(.5,"line"),
             panel.grid.minor.x = element_blank(),
             panel.grid.major.x = element_blank(),
             axis.line.x = element_line(color = "#22211d", 
@@ -348,22 +366,24 @@ plot_smooth_log <- function(df, x, y, group, color, title_input, xlab_input, cap
 }
 
 #define plotting function: geom_col
-plot_col <- function(df, group, fill, title_input, caption_input){  #xlab_input
+plot_col <- function(df, group, fill, title_input, caption_input){  
     
     group <- enquo(group)
     fill <- enquo(fill)
     
     ggplot(df, aes(x=date, y=diff, group=!!group, fill=!!fill)) + 
         geom_col(alpha=.6) +
-        geom_line(aes(x=date, y=MA_5d), color="Grey30") +
+        geom_line(aes(x=date, y=MA_5d, linetype = ""), color="Grey30") +
         facet_wrap(group, scales="free_y", ncol=1) +
-        theme_lineplot() +
+        theme_barplot() +
         scale_fill_brewer(palette="Dark2") +
         scale_x_date(date_breaks = "14 days" , date_labels = "%b-%d") +
         ggtitle(title_input) +
         ylab("Total") +
-        xlab("Date") +
-        labs(caption = caption_input)
+        xlab("") +
+        labs(caption = caption_input,
+             linetype = "5-day moving average", 
+             fill = "Actual data")
 }
 
 
