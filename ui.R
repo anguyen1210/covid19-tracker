@@ -94,7 +94,7 @@ shinyUI(fluidPage(
                     ),
         mainPanel(
             tabsetPanel(
-                tabPanel("Accumulated", 
+                tabPanel("Cumulative", 
                          #fluidRow(...)
                          br(),
                          plotOutput("plot1"),
@@ -120,8 +120,15 @@ shinyUI(fluidPage(
                 
                 tabPanel("Daily",
                          br(),
+                         h3("Daily totals"),
+                         p("The figure(s) below show the number of new confirmed cases/deaths per day
+                           in the selected country or province/state unit. Each bar in the respective
+                           plot corresponds to the actual number of new daily cases/deaths. The solid
+                           trend line is a 5-day moving average of the daily totals. Currently, the
+                           totals of all countries or province/state units are plotted from 1 February
+                           2020 onwards."),
+                         br(),
                          plotOutput("plot3", height="auto")
-                    
                          ),
                 
                 tabPanel("Data",
@@ -138,19 +145,18 @@ shinyUI(fluidPage(
                 
                 tabPanel("Source",
                          br(),
+                         
                          h3("Code and additional information"),
                          p("The code for this Shiny app can be found on my ", 
                             a("github repo.", href="https://github.com/anguyen1210/covid19-tracker")),
-                         br(),
                          p("For additional background, and to leave comments or suggestions, 
                             please visit ",
                            a("my blog.", 
                              href= "https://mentalbreaks.rbind.io/posts/covid-19-tracker/"), 
                             "Additional features and edits will be added on an ongoing basis. 
                            All comments, suggestions and pull requests welcome."), 
-                         br(),
+                         
                          h3("Data - Global"),
-                         br(),
                          p("The ", 
                            a("global data", 
                              href="https://github.com/CSSEGISandData/COVID-19"), 
@@ -159,76 +165,62 @@ shinyUI(fluidPage(
                            collection is available on the ", 
                            a("JHU CSSE 'Mapping 2019-nCov' blog post.", 
                              href="https://systems.jhu.edu/research/public-health/ncov/")),
-                         br(),
                          p("Global population data extracted from the ",
                            a("World Bank WDI database", 
                              href="https://databank.worldbank.org/source/world-development-indicators"), 
                            "current as of 2018."),
-                         br(),
+                         
                          h3("Data - National"),
-                         br(),
                          p("For a select number of countries, national data is available showing 
                            the number of confirmed cases and deaths at the state/province/territory 
                            level. For national data that does not come from the JHU CSSE dataset, 
                            please consult the relevant links listed below for additional information 
                            on the specific data source and its update frequency."),
-                         br(),
+                         
                          strong("Australia"),
-                         br(),
                          p("Australian territory-level data included in the JHU CSSE dataset."),
-                         br(),
                          p(a("Australian territory population data", 
                              href="https://www.abs.gov.au/ausstats/abs@.nsf/Latestproducts/3101.0Main%20Features3Sep%202019?opendocument&tabname=Summary&prodno=3101.0&issue=Sep%202019&num=&view="), 
                            "provided by the Australian Bureau of Statistics."),
-                         br(),
+                         
                          strong("Canada"),
-                         br(),
                          p("Canadian province-level data included in the JHU CSSE dataset."),
-                         br(),
                          p(a("Canada province population data ", 
                              href="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000901"), 
                            "provided by Statistics Canada, current as of 2019."),
-                         br(),
+                         
                          strong("China"),
-                         br(),
-                         p("China province-level data included in the JHU CSSE dataset.")  ,
-                         br(),
+                         p("China province-level data included in the JHU CSSE dataset."),
                          p(a("China province population data ", 
                              href="https://en.wikipedia.org/wiki/Provinces_of_China"), 
                            "taken from Wikipedia."),
-                         br(),
+                         
                          strong("Spain"),
-                         br(),
                          p(a("Spain province-level data ", 
                              href="https://covid19.isciii.es/"), 
                            "aggregated by the Spanish Ministry Health (Ministerio de Sandidad/ 
                            Instituto de Salud Carlos III)"),
-                         br(),
                          p(a("Spain province population data ", 
                              href="https://www.ine.es/"), 
                            "provided by the Spanish National Statistical Institute (Instituto 
                            Nacional de Estadística)"),
-                         br(),
+                         
                          strong("Switzerland"),
-                         br(),
                          p(a("Switzerland canton data ", 
                              href="https://www.corona-data.ch/"), 
                            "provided by Daniel Probst, by way of aggregated data from the Zurich 
                            Statistical Office (OpenZH)."),
-                         br(),
                          p(a("Switzerland canton population data ", 
                              href="https://www.bfs.admin.ch/bfs/en/home.html"), 
                              "provided by the Swiss Federal Statistical Office."),
-                         br(),
+                         
                          strong("United States"),
-                         br(),
                          p(a("U.S. state-level data ", 
                              href="https://github.com/nytimes/covid-19-data"), 
                            "is provided by the New York Times. Additional information about the data 
                            and its collection is available in ", 
                            a("the accompanying NYT article.", 
                              href="https://www.nytimes.com/article/coronavirus-county-data-us.html")),
-                         br(),
                          p(a("US state and territory population data ", 
                              href="https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html"), 
                            "provided by the US Census Bureau."),
