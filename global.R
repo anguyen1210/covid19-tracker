@@ -135,34 +135,34 @@ prep_national_nyt <- function(df_nyt, pop, outcome){
 }
 
 
-prep_national_es <- function(df_es, pop, outcome_es){
-    
-    outcome <- enquo(outcome_es)
-    
-    #select cols from nyt data
-    df <- df_es %>% select(CCAA, FECHA, !!outcome)
-    df <- df %>% filter(!is.na(FECHA))
-    df$CCAA <- str_replace_all(df$CCAA, "ME", "ML")
-    df$iso3166_2 <- paste0("ES-", df$CCAA)                             
-    df <- df %>% select(-CCAA)
-    
-    names(df) <- c("date", "count", "iso3166_2")
-    df$date <- as.Date(df$date, format = "%d/%m/%Y")
-    #df$date <- format(df$date,"%m/%d/%y")
-    
-    df <- df %>% left_join(select(pop_national, iso3166_2, country, province_state, pop_province_state), by = c("iso3166_2" = "iso3166_2"))
-    
-    #reorder final columns
-    df <- df %>% select(iso3166_2, country, province_state, pop_province_state, date, count)
-    
-    #add count_per_100k
-    df$count_per_100k <- df$count/df$pop_province_state * 100000
-    
-    #diff for daily increase
-    df <- df %>% group_by(province_state) %>% mutate(diff = count - lag(count))
-    
-    return(df)
-}
+# prep_national_es <- function(df_es, pop, outcome_es){
+#     
+#     outcome <- enquo(outcome_es)
+#     
+#     #select cols from spanish data
+#     df <- df_es %>% select(ccaa_iso, fecha, !!outcome)
+#     df <- df %>% filter(!is.na(fecha))
+#     df$ccaa_iso <- str_replace_all(df$ccaa_iso, "ME", "ML")
+#     df$iso3166_2 <- paste0("ES-", df$ccaa_iso)                             
+#     df <- df %>% select(-ccaa_iso)
+#     
+#     names(df) <- c("date", "count", "iso3166_2")
+#     df$date <- as.Date(df$date, format = "%d/%m/%Y")
+#     #df$date <- format(df$date,"%m/%d/%y")
+#     
+#     df <- df %>% left_join(select(pop_national, iso3166_2, country, province_state, pop_province_state), by = c("iso3166_2" = "iso3166_2"))
+#     
+#     #reorder final columns
+#     df <- df %>% select(iso3166_2, country, province_state, pop_province_state, date, count)
+#     
+#     #add count_per_100k
+#     df$count_per_100k <- df$count/df$pop_province_state * 100000
+#     
+#     #diff for daily increase
+#     df <- df %>% group_by(province_state) %>% mutate(diff = count - lag(count))
+#     
+#     return(df)
+# }
 
 
 prep_national_ch <- function(df_ch_outcome, pop){
@@ -374,7 +374,7 @@ plot_col <- function(df, group, fill, title_input, caption_input){
     ggplot(df, aes(x=date, y=diff, group=!!group, fill=!!fill)) + 
         geom_col(alpha=.6) +
         geom_line(aes(x=date, y=MA_5d, linetype = ""), color="Grey30") +
-        facet_wrap(group, scales="free_y", ncol=1) +
+        facet_wrap(group, scales="free_y", ncol=1) + 
         theme_barplot() +
         scale_fill_brewer(palette="Dark2") +
         scale_x_date(date_breaks = "14 days" , date_labels = "%b-%d") +
@@ -395,7 +395,9 @@ plot_col <- function(df, group, fill, title_input, caption_input){
 url_global_confirmed <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
 url_global_deaths <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 url_national_nyt_states <- 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
-url_national_es <- 'https://covid19.isciii.es/resources/serie_historica_acumulados.csv' 
+#url_national_es <- 'https://covid19.isciii.es/resources/serie_historica_acumulados.csv' 
+#url_national_es <- 'https://cnecovid.isciii.es/covid19/resources/agregados.csv' #changed to new site as of May 9
+#url_national_es <-'https://cnecovid.isciii.es/covid19/resources/datos_ccaas.csv' #I only updated this today, 2020-08-28
 url_national_ch_confirmed <- 'https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/master/covid19_cases_switzerland_openzh.csv'
 url_national_ch_deaths <- 'https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/master/covid19_fatalities_switzerland_openzh.csv'
 
@@ -403,7 +405,7 @@ url_national_ch_deaths <- 'https://raw.githubusercontent.com/daenuprobst/covid19
 global_confirmed_raw <- read_csv(url(url_global_confirmed), col_types=cols())
 global_deaths_raw <- read_csv(url(url_global_deaths), col_types=cols())
 national_nyt <- read_csv(url(url_national_nyt_states), col_types=cols())
-national_es <- suppressWarnings(read_csv(url(url_national_es), col_types=cols(), locale = locale(encoding = 'LATIN1'))) #extra blank column added to end throwing up warnings
+#national_es <- suppressWarnings(read_csv(url(url_national_es), col_types=cols(), locale = locale(encoding = 'LATIN1'))) #extra blank column added to end throwing up warnings
 national_ch_confirmed <- read_csv(url(url_national_ch_confirmed), col_types=cols())
 national_ch_deaths <- read_csv(url(url_national_ch_deaths), col_types=cols())
 
@@ -426,14 +428,16 @@ national_confirmed_us <- prep_national_nyt(national_nyt, pop_national, cases)
 national_deaths_us <- prep_national_nyt(national_nyt, pop_national, deaths)
 
 #ES
-national_confirmed_es <- prep_national_es(national_es, pop_national, CASOS)
-national_deaths_es <- prep_national_es(national_es, pop_national, Fallecidos)
+# national_confirmed_es <- prep_national_es(national_es, pop_national, num_casos)
+# national_deaths_es <- prep_national_es(national_es, pop_national, num_casos) 
 
 #CH
 national_confirmed_ch <- prep_national_ch(national_ch_confirmed, pop_national)
 national_deaths_ch <- prep_national_ch(national_ch_deaths, pop_national)
 
 ##merge jhu and nyt national data
-national_confirmed <- bind_rows(national_confirmed, national_confirmed_us, national_confirmed_es, national_confirmed_ch)
-national_deaths <- bind_rows(national_deaths, national_deaths_us, national_deaths_es, national_deaths_ch)
+national_confirmed <- bind_rows(national_confirmed, national_confirmed_us, national_confirmed_ch) #national_confirmed_es
+national_deaths <- bind_rows(national_deaths, national_deaths_us, national_deaths_ch) #national_deaths_es, 
 
+national_confirmed$count <- national_confirmed$count %>% replace_na(0)
+national_deaths$count <- national_deaths$count %>% replace_na(0)

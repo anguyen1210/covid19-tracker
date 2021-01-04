@@ -23,7 +23,7 @@ shinyUI(fluidPage(
                      h3("Select variables"),
                      radioButtons("radio_outcome", label = "Outcome",
                                   choices = list("confirmed cases" = 1, "deaths" = 2),  #, "recovered" = 3
-                                  selected = 2, inline=TRUE),
+                                  selected = 1, inline=TRUE),
                      
                      radioButtons("radio_level", label = "Observation level",
                                   choices = list("global" = 1, "national" = 2),  #, "recovered" = 3
@@ -38,9 +38,8 @@ shinyUI(fluidPage(
                                                          "Country",
                                                          choices = sort(as.character(unique(national_confirmed$country))), #c("Australia", "Canada", "China", "US"),
                                                          multiple = FALSE,
-                                                         selected = "US"
+                                                         selected = "Switzerland"
                                                          ),
-                                      # uiOutput("choose_country_national"),
                                       uiOutput("choose_state_national")
                                     ),
                      hr(), 
@@ -194,16 +193,6 @@ shinyUI(fluidPage(
                          p(a("China province population data ", 
                              href="https://en.wikipedia.org/wiki/Provinces_of_China"), 
                            "taken from Wikipedia."),
-                         
-                         strong("Spain"),
-                         p(a("Spain province-level data ", 
-                             href="https://covid19.isciii.es/"), 
-                           "aggregated by the Spanish Ministry Health (Ministerio de Sandidad/ 
-                           Instituto de Salud Carlos III)"),
-                         p(a("Spain province population data ", 
-                             href="https://www.ine.es/"), 
-                           "provided by the Spanish National Statistical Institute (Instituto 
-                           Nacional de Estadística)"),
                          
                          strong("Switzerland"),
                          p(a("Switzerland canton data ", 

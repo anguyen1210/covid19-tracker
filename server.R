@@ -13,21 +13,21 @@ shinyServer(function(input, output) {
     # Subset based on country selection
     
     ## Set default global selection
-    current_selection_global <- reactiveVal(list("Switzerland", "Spain", "Italy", "US"))
+    current_selection_global <- reactiveVal(list("Switzerland", "Spain", "Italy", "France", "Germany"))
     
     observeEvent(input$country_from_global, {
         current_selection_global(input$country_from_global)
     })
     
     ## Set default national-country selection
-    current_selection_national <- reactiveVal("US")
+    current_selection_national <- reactiveVal("Switzerland")
     
     observeEvent(input$country_from_national, {
         current_selection_national(input$country_from_national)
     })
     
     ## Set default national-state selection
-    current_selection_state <- reactiveVal(list("New York", "Washington", "Texas", "Louisiana"))
+    current_selection_state <- reactiveVal(list("Genève", "Vaud", "Valais", "Zürich", "Ticino"))
     
     observeEvent(input$state_from_national, {
         current_selection_state(input$state_from_national)
@@ -48,7 +48,7 @@ shinyServer(function(input, output) {
         selectInput("country_from_national",
                        "Country",
                        choices = sort(as.character(national_confirmed$country)),
-                       multiple=FALSE,
+                       multiple = FALSE,
                        selected = current_selection_national()
         )
     })
